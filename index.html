@@ -68,31 +68,15 @@
       <div class="live-filter">
         <div class="live-filter-header">
           <span>Min. Büyüklük Filtresi</span>
-          <span class="live-filter-val" id="filter-minmag-val">0.0</span>
+          <span class="live-filter-val" id="filter-minmag-val">1.5</span>
         </div>
         <input type="range" id="filter-minmag"
-               min="0" max="8" step="0.5" value="0"
+               min="0" max="8" step="0.5" value="1.5"
                oninput="this.style.setProperty('--range-pct', (this.value/8*100)+'%')" />
       </div>
 
       <!-- FİLTRE PANELİ -->
       <div class="filter-panel">
-
-        <!-- EventID Modu -->
-        <div class="panel-section">
-          <div class="section-header">
-            <span class="s-icon">🔑</span>
-            <h3>Event ID ile Ara</h3>
-          </div>
-          <div class="section-body">
-            <div class="form-group">
-              <label>Event ID (diğer filtreler devre dışı kalır)</label>
-              <input type="text" id="input-eventid" placeholder="örn: 512359"
-                     class="non-eventid-input" style="pointer-events:auto;opacity:1;" />
-              <!-- Not: eventid kendisi devre dışı bırakmaz -->
-            </div>
-          </div>
-        </div>
 
         <!-- Zaman Filtresi -->
         <div class="panel-section">
@@ -252,6 +236,22 @@
           </div>
         </div>
 
+                <!-- EventID Modu -->
+        <div class="panel-section">
+          <div class="section-header">
+            <span class="s-icon">🔑</span>
+            <h3>Event ID ile Ara</h3>
+          </div>
+          <div class="section-body">
+            <div class="form-group">
+              <label>Event ID (diğer filtreler devre dışı kalır)</label>
+              <input type="text" id="input-eventid" placeholder="örn: 512359"
+                     class="non-eventid-input" style="pointer-events:auto;opacity:1;" />
+              <!-- Not: eventid kendisi devre dışı bırakmaz -->
+            </div>
+          </div>
+        </div>
+
         <!-- Sorgu Seçenekleri -->
         <div class="panel-section">
           <div class="section-header">
@@ -262,7 +262,7 @@
             <div class="form-row non-eventid-input">
               <div class="form-group">
                 <label>Limit</label>
-                <input type="number" id="input-limit" value="500" min="1" max="25000" />
+                <input type="number" id="input-limit" value="3000" min="1" max="25000" />
               </div>
               <div class="form-group">
                 <label>Sıralama</label>
