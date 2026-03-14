@@ -112,6 +112,7 @@ function renderAll() { renderStats(); renderList(); renderMap(); }
 function renderStats() {
   const mags = state.filtered.map(e => parseFloat(e.magnitude || e.mag || 0));
   setEl('stat-total', state.filtered.length);
+  setEl('stat-total-list', state.filtered.length);
   setEl('stat-max',   mags.length ? Math.max(...mags).toFixed(1) : '—');
   setEl('stat-avg',   mags.length ? (mags.reduce((a,b)=>a+b,0)/mags.length).toFixed(2) : '—');
   setEl('stat-big',   mags.filter(m=>m>=4.0).length);
