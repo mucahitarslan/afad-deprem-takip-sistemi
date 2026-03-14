@@ -2,7 +2,7 @@
 // app.js — Ana uygulama mantığı
 // ============================================================
 
-import { initMap, renderQuakes, showMapTooltip } from './map.js';
+import { initMap, renderQuakes, showMapTooltip, geoToSvg } from './map.js';
 import {
   toApiDateTime, formatDisplayDate, timeAgo,
   setCache, getCache, buildCacheKey,
@@ -187,6 +187,22 @@ function renderList() {
       state.selectedId = String(id);
       document.querySelectorAll('.quake-item').forEach(el => el.classList.remove('selected'));
       item.classList.add('selected');
+
+      // Haritada tooltip göster
+      const lat = parseFloat(eq.latitude || eq.lat);
+      const lon = parseFloat(eq.longitude || eq.lon);
+      if (!isNaN(lat) && !isNaN(lon)) {
+        const { x, y } = geoToSvg(lat, lon);
+        showMapTooltip([
+          `M ${mag.toFixed(1)} — ${magLabel(mag)}`,
+          `📍 ${eq.location || eq.district || 'Bilinmiyor'}`,
+          `🕐 ${formatDisplayDate(eq.date || eq.eventDate)}`,
+          `⬇ Derinlik: ${eq.depth ? eq.depth + ' km' : '—'}`,
+        ].join('\n'), x, y);
+      }
+
+      // Sayfanın en üstüne git
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     });
     frag.appendChild(item);
   });
