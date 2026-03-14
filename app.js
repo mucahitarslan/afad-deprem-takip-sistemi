@@ -82,6 +82,14 @@ export async function doSearch() {
     applyClientFilter();
     renderAll();
     showStatus('HAZIR', `${list.length} deprem bulundu`, 'success');
+
+    // Gelen kayıt sayısı limite eşitse muhtemelen daha fazlası var
+    const usedLimit = parseInt(params.limit) || 5000;
+    if (list.length >= usedLimit) {
+      showLimitWarning(usedLimit, list.length);
+    } else {
+      clearLimitWarning();
+    }
   } catch (err) {
     console.error(err);
     showError(`Hata: ${err.message}`);
@@ -208,6 +216,36 @@ function showError(msg) {
 }
 function clearError() {
   const el = document.getElementById('error-banner'); if (el) el.style.display = 'none';
+}
+function showLimitWarning(limit, count) {
+  let el = document.getElementById('limit-warning');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'limit-warning';
+    el.className = 'limit-warning';
+    // Limit input'unun hemen üstüne ekle
+    const limitInput = document.getElementById('input-limit');
+    limitInput?.closest('.form-group')?.insertAdjacentElement('beforebegin', el);
+  }
+  el.innerHTML = `
+    ⚠ <strong>${count} deprem</strong> çekildi fakat bu limit değerinize
+    (<strong>${limit}</strong>) eşit — daha fazla deprem mevcut olabilir.
+    Tüm sonuçları görmek için limiti artırın.
+    <button class="limit-bump-btn" id="btn-bump-limit">Limiti 2× Artır</button>
+  `;
+  el.style.display = 'block';
+  document.getElementById('btn-bump-limit')?.addEventListener('click', () => {
+    const inp = document.getElementById('input-limit');
+    if (inp) {
+      inp.value = limit * 2;
+      clearLimitWarning();
+      doSearch();
+    }
+  });
+}
+function clearLimitWarning() {
+  const el = document.getElementById('limit-warning');
+  if (el) el.style.display = 'none';
 }
 function showStatus(label, msg, type = 'info') {
   const el = document.getElementById('status-bar');
