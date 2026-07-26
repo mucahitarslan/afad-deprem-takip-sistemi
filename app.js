@@ -4,7 +4,7 @@
 
 import { initMap, renderQuakes, showMapTooltip, geoToSvg } from './map.js';
 import {
-  toApiDateTime, formatDisplayDate, timeAgo,
+  toApiDateTime, toLocalDateInput, formatDisplayDate, timeAgo,
   setCache, getCache, buildCacheKey,
   buildApiUrl, validateParams, magColor, magLabel
 } from './utils.js';
@@ -301,7 +301,7 @@ function exportCsv() {
   const csv = [headers,...rows].map(r=>r.join(',')).join('\n');
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'}));
-  a.download = `depremler_${new Date().toISOString().slice(0,10)}.csv`;
+  a.download = `depremler_${toLocalDateInput(new Date())}.csv`;
   a.click();
 }
 
@@ -332,9 +332,9 @@ function setupFormLogic() {
   document.querySelectorAll('[data-quickdate]').forEach(btn =>
     btn.addEventListener('click', () => {
       const now = new Date(), past = new Date(now - btn.dataset.quickdate * 86400000);
-      document.getElementById('input-start-date').value = past.toISOString().slice(0,10);
+      document.getElementById('input-start-date').value = toLocalDateInput(past);
       document.getElementById('input-start-time').value = past.toTimeString().slice(0,8);
-      document.getElementById('input-end-date').value   = now.toISOString().slice(0,10);
+      document.getElementById('input-end-date').value   = toLocalDateInput(now);
       document.getElementById('input-end-time').value   = now.toTimeString().slice(0,8);
     })
   );
@@ -366,9 +366,9 @@ export function init() {
 
   const now  = new Date();
   const past = new Date(now - 7 * 86400000);
-  document.getElementById('input-start-date').value = past.toISOString().slice(0,10);
+  document.getElementById('input-start-date').value = toLocalDateInput(past);
   document.getElementById('input-start-time').value = '00:00:00';
-  document.getElementById('input-end-date').value   = now.toISOString().slice(0,10);
+  document.getElementById('input-end-date').value   = toLocalDateInput(now);
   document.getElementById('input-end-time').value   = now.toTimeString().slice(0,8);
 
   doSearch();

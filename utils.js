@@ -41,31 +41,42 @@ export function toApiDateTime(dateStr, timeStr = '00:00:00') {
 }
 
 /**
- * UTC tarih stringini UTC+3'e çevirir
- * AFAD API'si UTC döndürür, Türkiye saati UTC+3'tür.
+ * Date değerini tarayıcının yerel takviminde YYYY-MM-DD biçimine çevirir.
  */
-function toTurkeyTime(isoStr) {
-  if (!isoStr) return null;
-  // AFAD formatı: "2024-01-15 14:32:10" veya "2024-01-15T14:32:10"
-  // Sonuna Z ekleyerek UTC olduğunu belirtiriz, sonra +3 saat ekleriz
-  const normalized = isoStr.replace(' ', 'T');
-  const utcStr = normalized.endsWith('Z') || normalized.includes('+') ? normalized : normalized + 'Z';
-  const d = new Date(utcStr);
-  // 3 saat ekle (ms cinsinden)
-  return new Date(d.getTime() + 3 * 60 * 60 * 1000);
+export function toLocalDateInput(date) {
+  const pad = n => String(n).padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 }
 
 /**
- * Gösterim için tarih formatı (UTC+3)
+ * AFAD'ın saat dilimi bilgisi içermeyen zamanını UTC olarak ayrıştırır.
+ */
+function parseAfadDate(isoStr) {
+  if (!isoStr) return null;
+  const normalized = isoStr.replace(' ', 'T');
+  const hasZone = /(?:Z|[+-]\d{2}:\d{2})$/i.test(normalized);
+  const date = new Date(hasZone ? normalized : `${normalized}Z`);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+/**
+ * Gösterim için tarih formatı (Europe/Istanbul)
  */
 export function formatDisplayDate(isoStr) {
   if (!isoStr) return '—';
   try {
-    const d = toTurkeyTime(isoStr);
-    if (!d || isNaN(d)) return isoStr;
-    const pad = n => String(n).padStart(2, '0');
-    return `${pad(d.getUTCDate())}.${pad(d.getUTCMonth()+1)}.${d.getUTCFullYear()} ` +
-           `${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}:${pad(d.getUTCSeconds())}`;
+    const date = parseAfadDate(isoStr);
+    if (!date) return isoStr;
+    return new Intl.DateTimeFormat('tr-TR', {
+      timeZone: 'Europe/Istanbul',
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hourCycle: 'h23',
+    }).format(date).replace(',', '');
   } catch {
     return isoStr;
   }
@@ -78,9 +89,9 @@ export function formatDisplayDate(isoStr) {
 export function timeAgo(isoStr) {
   if (!isoStr) return '';
   try {
-    const normalized = isoStr.replace(' ', 'T');
-    const utcStr = normalized.endsWith('Z') || normalized.includes('+') ? normalized : normalized + 'Z';
-    const diff = Date.now() - new Date(utcStr).getTime();
+    const date = parseAfadDate(isoStr);
+    if (!date) return '';
+    const diff = Math.max(0, Date.now() - date.getTime());
     const mins = Math.floor(diff / 60000);
     if (mins < 1) return 'Şimdi';
     if (mins < 60) return `${mins} dk önce`;
