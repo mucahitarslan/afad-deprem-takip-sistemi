@@ -34,6 +34,8 @@ Türkiye genelindeki depremleri gerçek zamanlı olarak izleyen, **saf HTML / CS
 ├── map.js
 ├── utils.js
 ├── style.css
+├── assets/
+│   └── turkey-map.svg
 └── api.php          ← CORS proxy (PHP)
 ```
 
@@ -97,7 +99,7 @@ Uygulama AFAD Deprem Web Servisi v2'yi kullanır:
 | `index.html` | UI iskeleti — header, sidebar, harita, liste |
 | `style.css` | Sismik kontrol odası teması (dark, amber vurgu) |
 | `app.js` | API iletişimi, state yönetimi, render, CSV export |
-| `map.js` | Wikimedia SVG haritası, koordinat dönüşümü, tooltip |
+| `map.js` | Yerel Wikimedia SVG haritası, koordinat dönüşümü, tooltip |
 | `utils.js` | Cache, debounce, validasyon, URL builder |
 | `api.php` | CORS proxy — AFAD API'sine sunucu taraflı istek |
 

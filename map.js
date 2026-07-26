@@ -12,8 +12,8 @@
 import { magColor } from './utils.js';
 
 // ── Harita görüntüsü ─────────────────────────────────────────
-// Wikimedia Commons'tan PNG render (900px genişlik, şeffaf arka plan)
-const MAP_IMG_URL = 'https://upload.wikimedia.org/wikipedia/commons/5/52/Turkey_location_map.svg';
+// Wikimedia Commons kaynaklı harita projeyle birlikte sunulur.
+const MAP_IMG_URL = './assets/turkey-map.svg';
 
 // Haritanın coğrafi sınırları (Wikimedia meta verisinden)
 const GEO = {
