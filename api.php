@@ -143,17 +143,82 @@ if (isset($params['eventid'])) {
 
 $url = AFAD_API_URL . '?' . http_build_query($params, '', '&', PHP_QUERY_RFC3986);
 
-$ctx = stream_context_create(['http' => [
-    'method' => 'GET',
-    'header' => "User-Agent: DepremTakip/2.0\r\nAccept: application/json\r\n",
-    'timeout' => 15,
-    'ignore_errors' => true,
-]]);
+function fetchWithCurl(string $url): array
+{
+    $curl = curl_init($url);
+    if ($curl === false) {
+        return [0, false, 'cURL başlatılamadı.'];
+    }
 
-$data = @file_get_contents($url, false, $ctx);
+    curl_setopt_array($curl, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_FOLLOWLOCATION => false,
+        CURLOPT_CONNECTTIMEOUT => 5,
+        CURLOPT_TIMEOUT => 15,
+        CURLOPT_HTTPHEADER => [
+            'Accept: application/json',
+            'User-Agent: DepremTakip/2.0',
+        ],
+    ]);
+
+    $data = curl_exec($curl);
+    $status = (int) curl_getinfo($curl, CURLINFO_RESPONSE_CODE);
+    $errorNumber = curl_errno($curl);
+    $error = curl_error($curl);
+
+    if ($data === false) {
+        return [$errorNumber === CURLE_OPERATION_TIMEDOUT ? 504 : 502, false, $error];
+    }
+
+    return [$status, $data, ''];
+}
+
+function fetchWithStreams(string $url): array
+{
+    if (!filter_var(ini_get('allow_url_fopen'), FILTER_VALIDATE_BOOLEAN)) {
+        return [0, false, 'Sunucuda cURL ve allow_url_fopen kullanılamıyor.'];
+    }
+
+    $context = stream_context_create(['http' => [
+        'method' => 'GET',
+        'header' => "User-Agent: DepremTakip/2.0\r\nAccept: application/json\r\n",
+        'timeout' => 15,
+        'ignore_errors' => true,
+    ]]);
+
+    $data = @file_get_contents($url, false, $context);
+    $responseHeaders = function_exists('http_get_last_response_headers')
+        ? http_get_last_response_headers()
+        : (get_defined_vars()['http_response_header'] ?? []);
+    $status = 0;
+    if (isset($responseHeaders[0])
+        && preg_match('/\s(\d{3})\s/', $responseHeaders[0], $match)) {
+        $status = (int) $match[1];
+    }
+
+    return [$status, $data, $data === false ? 'Akış isteği başarısız oldu.' : ''];
+}
+
+if (function_exists('curl_init')) {
+    [$upstreamStatus, $data, $transportError] = fetchWithCurl($url);
+} else {
+    [$upstreamStatus, $data, $transportError] = fetchWithStreams($url);
+}
 
 if ($data === false) {
-    jsonError(502, 'AFAD API ulaşılamıyor.');
+    $status = $upstreamStatus === 504 ? 504 : 502;
+    jsonError($status, $status === 504
+        ? 'AFAD API isteği zaman aşımına uğradı.'
+        : 'AFAD API bağlantısı kurulamadı.');
+}
+
+if ($upstreamStatus < 200 || $upstreamStatus >= 300) {
+    jsonError(502, "AFAD API HTTP {$upstreamStatus} hatası döndürdü.");
+}
+
+json_decode($data, true);
+if (json_last_error() !== JSON_ERROR_NONE) {
+    jsonError(502, 'AFAD API geçersiz JSON yanıtı döndürdü.');
 }
 
 echo $data;

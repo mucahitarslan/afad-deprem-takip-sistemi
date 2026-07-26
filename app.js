@@ -32,9 +32,22 @@ async function fetchEarthquakes(params) {
 
   const ctrl  = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), 12000);
-  const resp  = await fetch(targetUrl, { signal: ctrl.signal });
-  clearTimeout(timer);
-  if (!resp.ok) throw new Error('HTTP ' + resp.status);
+  let resp;
+  try {
+    resp = await fetch(targetUrl, { signal: ctrl.signal });
+  } catch (error) {
+    if (error.name === 'AbortError') {
+      throw new Error('İstek zaman aşımına uğradı.');
+    }
+    throw new Error('Sunucu bağlantısı kurulamadı.');
+  } finally {
+    clearTimeout(timer);
+  }
+
+  if (!resp.ok) {
+    const body = await resp.json().catch(() => null);
+    throw new Error(body?.error || `Sunucu HTTP ${resp.status} hatası döndürdü.`);
+  }
   const data = await resp.json();
   const list = Array.isArray(data) ? data : (data.result || data.data || []);
   setCache(cacheKey, list);
