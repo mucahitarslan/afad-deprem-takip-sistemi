@@ -5,7 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>AFAD Deprem Takip Sistemi</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css?v=20260726" />
 </head>
 <body>
 
@@ -72,8 +72,7 @@
           <span class="live-filter-val" id="filter-minmag-val">1.5</span>
         </div>
         <input type="range" id="filter-minmag"
-               min="0" max="8" step="0.5" value="1.5"
-               oninput="this.style.setProperty('--range-pct', (this.value/8*100)+'%')" />
+               min="0" max="8" step="0.5" value="1.5" />
       </div>
 
       <!-- FİLTRE PANELİ -->
@@ -356,12 +355,6 @@
     </main><!-- /main-content -->
   </div><!-- /app-layout -->
 
-  <script type="module" src="app.js"></script>
-  <script type="module">
-    import { init } from './app.js';
-    document.addEventListener('DOMContentLoaded', () => {
-      init();
-    });
-  </script>
+  <script type="module" src="bootstrap.js?v=20260726"></script>
 </body>
 </html>

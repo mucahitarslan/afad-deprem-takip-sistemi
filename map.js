@@ -9,11 +9,11 @@
 //   North : 42.107°N   South: 35.817°N
 // ============================================================
 
-import { magColor } from './utils.js';
+import { magColor } from './utils.js?v=20260726';
 
 // ── Harita görüntüsü ─────────────────────────────────────────
 // Wikimedia Commons kaynaklı harita projeyle birlikte sunulur.
-const MAP_IMG_URL = './assets/turkey-map.svg';
+const MAP_IMG_URL = './assets/turkey-map.svg?v=20260726';
 
 // Haritanın coğrafi sınırları (Wikimedia meta verisinden)
 const GEO = {

@@ -4,6 +4,10 @@ declare(strict_types=1);
 // api.php — Güvenli AFAD API proxy'si (PHP 7.4+)
 
 header('Content-Type: application/json; charset=utf-8');
+header('Cache-Control: no-store');
+header('X-Content-Type-Options: nosniff');
+header('X-Frame-Options: DENY');
+header('Referrer-Policy: no-referrer');
 
 const AFAD_API_URL = 'https://servisnet.afad.gov.tr/apigateway/deprem/apiv2/event/filter';
 

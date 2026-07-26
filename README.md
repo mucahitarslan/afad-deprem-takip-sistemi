@@ -30,6 +30,7 @@ Türkiye genelindeki depremleri gerçek zamanlı olarak izleyen, **saf HTML / CS
 ```
 /
 ├── index.html
+├── bootstrap.js
 ├── app.js
 ├── map.js
 ├── utils.js
@@ -40,6 +41,8 @@ Türkiye genelindeki depremleri gerçek zamanlı olarak izleyen, **saf HTML / CS
 ```
 
 > Tüm dosyalar aynı klasörde olmalıdır.
+> Apache hostinglerde `.htaccess` dosyasını da yükleyin; güvenlik ve cache
+> başlıkları bu dosya üzerinden uygulanır.
 
 ### Yerel Test
 

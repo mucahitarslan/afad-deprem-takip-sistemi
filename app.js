@@ -2,12 +2,12 @@
 // app.js — Ana uygulama mantığı
 // ============================================================
 
-import { initMap, renderQuakes, showMapTooltip, geoToSvg } from './map.js';
+import { initMap, renderQuakes, showMapTooltip, geoToSvg } from './map.js?v=20260726';
 import {
   toApiDateTime, toLocalDateInput, formatDisplayDate, timeAgo,
   setCache, getCache, buildCacheKey,
   buildApiUrl, validateParams, magColor, magLabel
-} from './utils.js';
+} from './utils.js?v=20260726';
 
 // ─── Uygulama Durumu ──────────────────────────────────────
 const state = {
@@ -325,9 +325,11 @@ function setupFormLogic() {
   const slider    = document.getElementById('filter-minmag');
   const sliderVal = document.getElementById('filter-minmag-val');
   slider?.addEventListener('input', () => {
+    slider.style.setProperty('--range-pct', `${slider.value / 8 * 100}%`);
     sliderVal.textContent = parseFloat(slider.value).toFixed(1);
     applyClientFilter(); renderAll();
   });
+  slider?.style.setProperty('--range-pct', `${slider.value / 8 * 100}%`);
 
   document.querySelectorAll('[data-quickdate]').forEach(btn =>
     btn.addEventListener('click', () => {
