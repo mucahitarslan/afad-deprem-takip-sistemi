@@ -9,6 +9,9 @@ import {
   buildApiUrl, validateParams, magColor, magLabel
 } from './utils.js?v=20260726';
 
+const LIST_PAGE_SIZE = 250;
+const MAX_MAP_POINTS = 2000;
+
 // ─── Uygulama Durumu ──────────────────────────────────────
 const state = {
   earthquakes: [],
@@ -16,6 +19,7 @@ const state = {
   selectedId: null,
   loading: false,
   lastFetch: null,
+  visibleLimit: LIST_PAGE_SIZE,
 };
 
 
@@ -92,6 +96,7 @@ export async function doSearch() {
     const list = Array.isArray(raw) ? raw : (raw.result || raw.data || []);
     state.earthquakes = list;
     state.lastFetch   = new Date();
+    state.visibleLimit = LIST_PAGE_SIZE;
     applyClientFilter();
     renderAll();
     showStatus('HAZIR', `${list.length} deprem bulundu`, 'success');
@@ -133,7 +138,7 @@ function renderStats() {
 }
 
 function renderMap() {
-  renderQuakes(state.filtered,
+  renderQuakes(selectMapQuakes(state.filtered),
     (eq, x, y) => {
       const mag = parseFloat(eq.magnitude || eq.mag || 0);
       showMapTooltip([
@@ -151,6 +156,30 @@ function renderMap() {
   );
 }
 
+export function selectMapQuakes(earthquakes, maxPoints = MAX_MAP_POINTS) {
+  if (earthquakes.length <= maxPoints) return earthquakes;
+
+  const strong = earthquakes.filter(eq =>
+    parseFloat(eq.magnitude || eq.mag || 0) >= 4
+  );
+  const strongSet = new Set(strong);
+  const remaining = earthquakes.filter(eq => !strongSet.has(eq));
+  const available = Math.max(0, maxPoints - strong.length);
+  const step = available > 0 ? remaining.length / available : Infinity;
+  const sampled = [];
+
+  for (let index = 0; index < available; index++) {
+    sampled.push(remaining[Math.floor(index * step)]);
+  }
+
+  return strong.length >= maxPoints
+    ? strong.sort((a, b) =>
+        parseFloat(b.magnitude || b.mag || 0) -
+        parseFloat(a.magnitude || a.mag || 0)
+      ).slice(0, maxPoints)
+    : strong.concat(sampled);
+}
+
 function renderList() {
   const listEl = document.getElementById('quake-list');
   if (!listEl) return;
@@ -165,7 +194,8 @@ function renderList() {
   }
 
   const frag = document.createDocumentFragment();
-  state.filtered.forEach(eq => {
+  const visible = state.filtered.slice(0, state.visibleLimit);
+  visible.forEach(eq => {
     const id    = eq.eventID || eq.id || Math.random();
     const mag   = parseFloat(eq.magnitude || eq.mag || 0);
     const color = magColor(mag);
@@ -221,6 +251,18 @@ function renderList() {
   });
   listEl.innerHTML = '';
   listEl.appendChild(frag);
+
+  if (visible.length < state.filtered.length) {
+    const more = document.createElement('button');
+    more.type = 'button';
+    more.className = 'list-load-more';
+    more.textContent = `DAHA FAZLA GÖSTER (${visible.length}/${state.filtered.length})`;
+    more.addEventListener('click', () => {
+      state.visibleLimit += LIST_PAGE_SIZE;
+      renderList();
+    });
+    listEl.appendChild(more);
+  }
 }
 
 function highlightListItem(id) {
@@ -310,7 +352,10 @@ function setupFormLogic() {
   document.getElementById('input-eventid')?.addEventListener('input', e => {
     const has = e.target.value.trim() !== '';
     document.querySelectorAll('.non-eventid-input').forEach(el => {
-      el.disabled = has;
+      const controls = el.matches('input, select, button')
+        ? [el]
+        : el.querySelectorAll('input, select, button');
+      controls.forEach(control => { control.disabled = has; });
       el.closest?.('.form-group')?.classList.toggle('disabled', has);
     });
   });
@@ -327,6 +372,7 @@ function setupFormLogic() {
   slider?.addEventListener('input', () => {
     slider.style.setProperty('--range-pct', `${slider.value / 8 * 100}%`);
     sliderVal.textContent = parseFloat(slider.value).toFixed(1);
+    state.visibleLimit = LIST_PAGE_SIZE;
     applyClientFilter(); renderAll();
   });
   slider?.style.setProperty('--range-pct', `${slider.value / 8 * 100}%`);
@@ -344,6 +390,7 @@ function setupFormLogic() {
   document.getElementById('btn-search')?.addEventListener('click', () => doSearch());
   document.getElementById('btn-clear')?.addEventListener('click', () => {
     state.earthquakes = []; state.filtered = []; state.selectedId = null;
+    state.visibleLimit = LIST_PAGE_SIZE;
     renderAll(); clearError(); showStatus('TEMİZLENDİ','Veriler temizlendi','info');
   });
   document.getElementById('btn-export')?.addEventListener('click', exportCsv);

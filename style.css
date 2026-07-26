@@ -717,6 +717,26 @@ input[type="range"]::-webkit-slider-thumb {
 #quake-list::-webkit-scrollbar-track { background: transparent; }
 #quake-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 
+.list-load-more {
+  width: calc(100% - 24px);
+  margin: 12px;
+  padding: 11px 14px;
+  border: 1px solid var(--border-bright);
+  border-radius: 4px;
+  background: var(--bg-panel);
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  cursor: pointer;
+}
+
+.list-load-more:hover {
+  border-color: var(--accent);
+  background: var(--accent-dim);
+}
+
 /* ─── Deprem Listesi Öğesi ──────────────────────────────── */
 .quake-item {
   position: relative;
