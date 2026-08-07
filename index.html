@@ -1,360 +1,379 @@
 <!DOCTYPE html>
-
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="dark" />
   <title>AFAD Deprem Takip Sistemi</title>
-  <link rel="stylesheet" href="style.css?v=20260726" />
+  <link rel="stylesheet" href="style.css?v=20260807-design" />
 </head>
 <body>
-
-  <!-- ─── HEADER ─────────────────────────────────────── -->
   <header class="header">
     <div class="header-left">
       <div class="header-logo">
-        <div class="logo-icon">🌍</div>
+        <div class="logo-mark" aria-hidden="true">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
         <div>
-          <div class="logo-text">SISMOGRAF</div>
-          <div class="logo-sub">AFAD Deprem İzleme</div>
+          <div class="logo-text">Deprem Takip</div>
+          <div class="logo-sub">AFAD verileriyle Türkiye geneli izleme</div>
         </div>
       </div>
-      <div class="header-badge">
-        <div class="pulse-dot"></div>
-        CANLI
+
+      <div class="header-badge" aria-label="Canlı veri durumu">
+        <span class="pulse-dot"></span>
+        Canlı
       </div>
     </div>
+
     <div class="header-right">
-      <span class="header-source">deprem.afad.gov.tr</span>
+      <span class="header-source">Kaynak: AFAD</span>
       <span class="live-clock" id="live-clock">00:00:00</span>
     </div>
   </header>
 
-  <!-- ─── ANA LAYOUT ─────────────────────────────────── -->
   <div class="app-layout">
-
-    <!-- STATUS BAR -->
-    <div id="status-bar" class="status-bar status-info">
-      <span class="status-label">BAŞLATILIYOR</span>
+    <div id="status-bar" class="status-bar status-info" aria-live="polite">
+      <span class="status-label">Başlatılıyor</span>
       <span class="status-msg">Sistem yükleniyor…</span>
     </div>
 
-    <!-- ─── SIDEBAR (FİLTRELER) ──────────────────────── -->
-    <aside class="sidebar">
+    <aside class="sidebar" aria-label="Deprem filtreleri">
+      <div id="error-banner" role="alert" aria-live="assertive"></div>
 
-      <!-- Hata Banner -->
-      <div id="error-banner"></div>
+      <div class="sidebar-intro">
+        <div>
+          <p class="eyebrow">Genel görünüm</p>
+          <h2>Deprem özeti</h2>
+        </div>
+        <p class="sidebar-intro-copy">
+          Sonuçları zaman, büyüklük, derinlik ve konuma göre daraltın.
+        </p>
+      </div>
 
-      <!-- İstatistikler -->
       <div class="stats-grid">
         <div class="stat-card">
           <div class="stat-label">Toplam</div>
           <div class="stat-value" id="stat-total">—</div>
         </div>
         <div class="stat-card">
-          <div class="stat-label">Maks. Mag.</div>
+          <div class="stat-label">En yüksek</div>
           <div class="stat-value danger" id="stat-max">—</div>
         </div>
         <div class="stat-card">
-          <div class="stat-label">Ort. Mag.</div>
+          <div class="stat-label">Ortalama</div>
           <div class="stat-value" id="stat-avg">—</div>
         </div>
         <div class="stat-card">
-          <div class="stat-label">M≥4.0</div>
+          <div class="stat-label">M ≥ 4.0</div>
           <div class="stat-value danger" id="stat-big">—</div>
         </div>
       </div>
 
-      <!-- Anlık Büyüklük Filtresi -->
       <div class="live-filter">
         <div class="live-filter-header">
-          <span>Min. Büyüklük Filtresi</span>
+          <label for="filter-minmag">Listede minimum büyüklük</label>
           <span class="live-filter-val" id="filter-minmag-val">1.5</span>
         </div>
-        <input type="range" id="filter-minmag"
-               min="0" max="8" step="0.5" value="1.5" />
+        <input
+          type="range"
+          id="filter-minmag"
+          min="0"
+          max="8"
+          step="0.5"
+          value="1.5"
+        />
       </div>
 
-      <!-- FİLTRE PANELİ -->
       <div class="filter-panel">
-
-        <!-- Zaman Filtresi -->
-        <div class="panel-section">
+        <section class="panel-section">
           <div class="section-header">
-            <span class="s-icon">⏱</span>
-            <h3>Zaman Aralığı</h3>
+            <span class="section-index">01</span>
+            <div>
+              <h3>Zaman aralığı</h3>
+              <p>İncelenecek tarih ve saat aralığı</p>
+            </div>
           </div>
+
           <div class="section-body">
             <div class="form-group non-eventid-input">
-              <div class="quick-dates">
-                <button class="quick-btn non-eventid-input" data-quickdate="1">Son 24s</button>
-                <button class="quick-btn non-eventid-input" data-quickdate="7">7 Gün</button>
-                <button class="quick-btn non-eventid-input" data-quickdate="30">30 Gün</button>
-                <button class="quick-btn non-eventid-input" data-quickdate="90">90 Gün</button>
+              <div class="quick-dates" aria-label="Hızlı tarih seçenekleri">
+                <button type="button" class="quick-btn non-eventid-input" data-quickdate="1">Son 24 saat</button>
+                <button type="button" class="quick-btn non-eventid-input" data-quickdate="7">7 gün</button>
+                <button type="button" class="quick-btn non-eventid-input" data-quickdate="30">30 gün</button>
+                <button type="button" class="quick-btn non-eventid-input" data-quickdate="90">90 gün</button>
               </div>
             </div>
+
             <div class="form-row non-eventid-input">
               <div class="form-group">
-                <label>Başlangıç Tarihi</label>
+                <label for="input-start-date">Başlangıç tarihi</label>
                 <input type="date" id="input-start-date" />
               </div>
               <div class="form-group">
-                <label>Saat</label>
+                <label for="input-start-time">Saat</label>
                 <input type="time" id="input-start-time" value="00:00" step="1" />
               </div>
             </div>
+
             <div class="form-row non-eventid-input">
               <div class="form-group">
-                <label>Bitiş Tarihi</label>
+                <label for="input-end-date">Bitiş tarihi</label>
                 <input type="date" id="input-end-date" />
               </div>
               <div class="form-group">
-                <label>Saat</label>
+                <label for="input-end-time">Saat</label>
                 <input type="time" id="input-end-time" value="23:59" step="1" />
               </div>
             </div>
           </div>
-        </div>
+        </section>
 
-        <!-- Büyüklük Filtresi -->
-        <div class="panel-section">
+        <section class="panel-section">
           <div class="section-header">
-            <span class="s-icon">📊</span>
-            <h3>Büyüklük & Derinlik</h3>
+            <span class="section-index">02</span>
+            <div>
+              <h3>Büyüklük ve derinlik</h3>
+              <p>Sismik olay özellikleri</p>
+            </div>
           </div>
+
           <div class="section-body">
             <div class="form-row non-eventid-input">
               <div class="form-group">
-                <label>Min. Büyüklük</label>
-                <input type="number" id="input-minmag" placeholder="örn: 2.0"
-                       step="0.1" min="0" max="10" />
+                <label for="input-minmag">Min. büyüklük</label>
+                <input type="number" id="input-minmag" placeholder="2.0" step="0.1" min="0" max="10" />
               </div>
               <div class="form-group">
-                <label>Maks. Büyüklük</label>
-                <input type="number" id="input-maxmag" placeholder="örn: 9.0"
-                       step="0.1" min="0" max="10" />
+                <label for="input-maxmag">Maks. büyüklük</label>
+                <input type="number" id="input-maxmag" placeholder="9.0" step="0.1" min="0" max="10" />
               </div>
             </div>
+
             <div class="form-group non-eventid-input">
-              <label>Büyüklük Tipi</label>
+              <label for="input-magtype">Büyüklük tipi</label>
               <select id="input-magtype">
                 <option value="">Tümü</option>
-                <option value="ML">ML (Yerel)</option>
-                <option value="Mw">Mw (Moment)</option>
-                <option value="Ms">Ms (Yüzey Dalgası)</option>
-                <option value="mb">mb (Cisim Dalgası)</option>
-                <option value="md">md (Süre)</option>
+                <option value="ML">ML — Yerel</option>
+                <option value="Mw">Mw — Moment</option>
+                <option value="Ms">Ms — Yüzey Dalgası</option>
+                <option value="mb">mb — Cisim Dalgası</option>
+                <option value="md">md — Süre</option>
               </select>
             </div>
+
             <div class="form-row non-eventid-input">
               <div class="form-group">
-                <label>Min. Derinlik (km)</label>
-                <input type="number" id="input-mindepth" placeholder="örn: 0"
-                       step="1" min="0" />
+                <label for="input-mindepth">Min. derinlik (km)</label>
+                <input type="number" id="input-mindepth" placeholder="0" step="1" min="0" />
               </div>
               <div class="form-group">
-                <label>Maks. Derinlik (km)</label>
-                <input type="number" id="input-maxdepth" placeholder="örn: 700"
-                       step="1" min="0" />
+                <label for="input-maxdepth">Maks. derinlik (km)</label>
+                <input type="number" id="input-maxdepth" placeholder="700" step="1" min="0" />
               </div>
             </div>
           </div>
-        </div>
+        </section>
 
-        <!-- Konum Filtresi -->
-        <div class="panel-section">
+        <section class="panel-section">
           <div class="section-header">
-            <span class="s-icon">📍</span>
-            <h3>Konum Sınırı</h3>
+            <span class="section-index">03</span>
+            <div>
+              <h3>Konum sınırı</h3>
+              <p>Opsiyonel coğrafi filtre</p>
+            </div>
           </div>
+
           <div class="section-body">
-            <div class="form-group non-eventid-input">
-              <label>Konum Modu</label>
+            <fieldset class="form-group non-eventid-input">
+              <legend>Konum modu</legend>
               <div class="radio-group">
                 <label class="radio-option">
                   <input type="radio" name="loc-mode" value="none" checked />
-                  Sınır Yok
+                  <span>Sınır yok</span>
                 </label>
                 <label class="radio-option">
                   <input type="radio" name="loc-mode" value="rect" />
-                  Dikdörtgen Alan
+                  <span>Dikdörtgen alan</span>
                 </label>
                 <label class="radio-option">
                   <input type="radio" name="loc-mode" value="radial" />
-                  Radyal Alan
+                  <span>Radyal alan</span>
                 </label>
               </div>
-            </div>
+            </fieldset>
 
-            <!-- Dikdörtgen -->
             <div id="panel-rect" class="hidden non-eventid-input">
               <div class="form-row">
                 <div class="form-group">
-                  <label>Min. Enlem (G)</label>
+                  <label for="input-minlat">Min. enlem (G)</label>
                   <input type="number" id="input-minlat" placeholder="36.0" step="0.01" />
                 </div>
                 <div class="form-group">
-                  <label>Maks. Enlem (K)</label>
+                  <label for="input-maxlat">Maks. enlem (K)</label>
                   <input type="number" id="input-maxlat" placeholder="42.5" step="0.01" />
                 </div>
               </div>
-              <div class="form-row" style="margin-top:6px">
+
+              <div class="form-row form-row-spaced">
                 <div class="form-group">
-                  <label>Min. Boylam (B)</label>
+                  <label for="input-minlon">Min. boylam (B)</label>
                   <input type="number" id="input-minlon" placeholder="26.0" step="0.01" />
                 </div>
                 <div class="form-group">
-                  <label>Maks. Boylam (D)</label>
+                  <label for="input-maxlon">Maks. boylam (D)</label>
                   <input type="number" id="input-maxlon" placeholder="45.0" step="0.01" />
                 </div>
               </div>
             </div>
 
-            <!-- Radyal -->
             <div id="panel-radial" class="hidden non-eventid-input">
               <div class="form-row">
                 <div class="form-group">
-                  <label>Merkez Enlem</label>
+                  <label for="input-lat">Merkez enlem</label>
                   <input type="number" id="input-lat" placeholder="39.9" step="0.01" />
                 </div>
                 <div class="form-group">
-                  <label>Merkez Boylam</label>
+                  <label for="input-lon">Merkez boylam</label>
                   <input type="number" id="input-lon" placeholder="32.8" step="0.01" />
                 </div>
               </div>
-              <div class="form-row" style="margin-top:6px">
+
+              <div class="form-row form-row-spaced">
                 <div class="form-group">
-                  <label>Maks. Mesafe (m)</label>
+                  <label for="input-maxrad">Maks. mesafe (m)</label>
                   <input type="number" id="input-maxrad" placeholder="100000" step="1000" />
                 </div>
                 <div class="form-group">
-                  <label>Min. Mesafe (m)</label>
+                  <label for="input-minrad">Min. mesafe (m)</label>
                   <input type="number" id="input-minrad" placeholder="0" step="1000" />
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        </section>
 
-                <!-- EventID Modu -->
-        <div class="panel-section">
+        <section class="panel-section">
           <div class="section-header">
-            <span class="s-icon">🔑</span>
-            <h3>Event ID ile Ara</h3>
-          </div>
-          <div class="section-body">
-            <div class="form-group">
-              <label>Event ID (diğer filtreler devre dışı kalır)</label>
-              <input type="text" id="input-eventid" placeholder="örn: 512359"
-                     inputmode="numeric" autocomplete="off" />
+            <span class="section-index">04</span>
+            <div>
+              <h3>Event ID</h3>
+              <p>Tek bir olayı doğrudan sorgula</p>
             </div>
           </div>
-        </div>
 
-        <!-- Sorgu Seçenekleri -->
-        <div class="panel-section">
-          <div class="section-header">
-            <span class="s-icon">⚙</span>
-            <h3>Sorgu Seçenekleri</h3>
+          <div class="section-body">
+            <div class="form-group">
+              <label for="input-eventid">Event ID</label>
+              <input
+                type="text"
+                id="input-eventid"
+                placeholder="Örn. 512359"
+                inputmode="numeric"
+                autocomplete="off"
+              />
+              <small class="field-note">Girildiğinde diğer filtreler devre dışı kalır.</small>
+            </div>
           </div>
+        </section>
+
+        <section class="panel-section">
+          <div class="section-header">
+            <span class="section-index">05</span>
+            <div>
+              <h3>Sorgu seçenekleri</h3>
+              <p>Sonuç sayısı ve sıralama</p>
+            </div>
+          </div>
+
           <div class="section-body">
             <div class="form-row non-eventid-input">
               <div class="form-group">
-                <label>Limit</label>
+                <label for="input-limit">Limit</label>
                 <input type="number" id="input-limit" value="5000" min="1" max="25000" />
               </div>
               <div class="form-group">
-                <label>Sıralama</label>
+                <label for="input-orderby">Sıralama</label>
                 <select id="input-orderby">
-                  <option value="timedesc">Zaman (Yeni)</option>
-                  <option value="time">Zaman (Eski)</option>
-                  <option value="magnitudedesc">Büyüklük (Büyük)</option>
-                  <option value="magnitude">Büyüklük (Küçük)</option>
+                  <option value="timedesc">En yeni</option>
+                  <option value="time">En eski</option>
+                  <option value="magnitudedesc">Büyüklük: yüksek</option>
+                  <option value="magnitude">Büyüklük: düşük</option>
                 </select>
               </div>
             </div>
           </div>
-        </div>
+        </section>
 
-        <!-- Arama Butonları -->
         <div class="search-actions">
-          <button class="btn-primary" id="btn-search">SORGULA</button>
-          <div style="display:flex;gap:6px">
-            <button class="btn-secondary" id="btn-clear" style="flex:1">TEMİZLE</button>
-            <button class="btn-icon" id="btn-export" title="CSV İndir">⬇ CSV</button>
+          <button type="button" class="btn-primary" id="btn-search">Sonuçları getir</button>
+          <div class="secondary-actions">
+            <button type="button" class="btn-secondary" id="btn-clear">Temizle</button>
+            <button type="button" class="btn-icon" id="btn-export" title="CSV indir">CSV indir</button>
           </div>
         </div>
 
-        <!-- Son Güncelleme -->
-        <div style="text-align:center;padding:4px 0 8px">
-          <span style="font-family:var(--font-mono);font-size:9px;color:var(--text-muted);letter-spacing:1px;">
-            SON GÜNCELLEME: <span id="stat-time">—</span>
-          </span>
+        <div class="last-update">
+          Son güncelleme
+          <span id="stat-time">—</span>
         </div>
+      </div>
+    </aside>
 
-      </div><!-- /filter-panel -->
-    </aside><!-- /sidebar -->
-
-    <!-- ─── ANA İÇERİK ─────────────────────────────────── -->
     <main class="main-content">
-
-      <!-- Harita -->
-      <div class="map-section">
+      <section class="map-section" aria-labelledby="map-heading">
         <div class="map-header">
-          <span class="map-title">📡 TÜRKİYE DEPREM HARİTASI</span>
-          <div class="map-legend">
-            <div class="legend-item">
-              <div class="legend-dot" style="background:#4ade80"></div>M&lt;2
-            </div>
-            <div class="legend-item">
-              <div class="legend-dot" style="background:#facc15"></div>M2-4
-            </div>
-            <div class="legend-item">
-              <div class="legend-dot" style="background:#fb923c"></div>M4-5
-            </div>
-            <div class="legend-item">
-              <div class="legend-dot" style="background:#f87171"></div>M5-6
-            </div>
-            <div class="legend-item">
-              <div class="legend-dot" style="background:#e11d48"></div>M≥6
-            </div>
-            <div class="legend-item">
-              <div class="legend-dot" style="background:#7c3aed"></div>M≥7
-            </div>
+          <div>
+            <p class="eyebrow">Coğrafi dağılım</p>
+            <h1 class="map-title" id="map-heading">Türkiye deprem haritası</h1>
+          </div>
+
+          <div class="map-legend" aria-label="Büyüklük göstergesi">
+            <div class="legend-item"><span class="legend-dot" style="background:#4ade80"></span>M&lt;2</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#facc15"></span>M2–4</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#fb923c"></span>M4–5</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#f87171"></span>M5–6</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#e11d48"></span>M≥6</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#7c3aed"></span>M≥7</div>
           </div>
         </div>
 
         <div id="map-container">
-          <!-- SVG harita buraya js ile eklenir -->
           <div id="loading-spinner">
             <div class="spinner-ring"></div>
-            <div class="spinner-text">SORGULANYOR…</div>
+            <div class="spinner-text">Veriler alınıyor…</div>
           </div>
         </div>
-      </div>
+      </section>
 
-      <!-- Deprem Listesi -->
-      <div class="list-section">
+      <section class="list-section" aria-labelledby="list-heading">
         <div class="list-header">
-          <span class="list-title">📋 DEPREM LİSTESİ</span>
+          <div>
+            <p class="eyebrow">Kayıtlar</p>
+            <h2 class="list-title" id="list-heading">Deprem listesi</h2>
+          </div>
+
           <div class="list-actions">
-            <span style="font-family:var(--font-mono);font-size:10px;color:var(--text-muted)">
-              <span id="stat-total-list">0</span> sonuç
+            <span class="result-count">
+              <strong id="stat-total-list">0</strong>
+              sonuç
             </span>
           </div>
         </div>
+
         <div id="quake-list">
           <div class="list-empty">
-            <span class="empty-icon">◎</span>
+            <span class="empty-icon" aria-hidden="true">—</span>
             <p>Henüz veri yüklenmedi</p>
-            <small>Filtreleri ayarlayıp "SORGULA" butonuna basın</small>
+            <small>Filtreleri ayarlayıp sonuçları getirin.</small>
           </div>
         </div>
-      </div>
+      </section>
+    </main>
+  </div>
 
-    </main><!-- /main-content -->
-  </div><!-- /app-layout -->
-
-  <script type="module" src="bootstrap.js?v=20260726"></script>
+  <script type="module" src="bootstrap.js?v=20260807"></script>
 </body>
 </html>
